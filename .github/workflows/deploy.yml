@@ -46,7 +46,9 @@ jobs:
         env:
           SCI_TENANT_URL: ${{ vars.SCI_TENANT_URL }}
           SCI_CLIENT_ID: ${{ vars.SCI_CLIENT_ID }}
-        run: python .github/action/fetch-token/fetch.py
+        run: |
+         echo "::add-mask::$SCI_CLIENT_ID"
+         python .github/action/fetch-token/fetch.py
 
   build-solution:
     runs-on: ubuntu-latest
@@ -79,5 +81,7 @@ jobs:
         env:
           JOULE_STUDIO_HOST: ${{ vars.JOULE_STUDIO_URL }}
           JOULE_STUDIO_TOKEN: ${{ needs.fetch-token.outputs.sciToken }}
-        run: ${{ github.workspace }}/.jl-cli/node_modules/.bin/jl solution deploy --force
+        run: |
+              echo "::add-mask::$JOULE_STUDIO_TOKEN"
+              ${{ github.workspace }}/.jl-cli/node_modules/.bin/jl solution deploy --force
 
