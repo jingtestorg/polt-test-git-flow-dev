@@ -6,6 +6,7 @@ on:
 env:
   NPM_REGISTRY: "https://registry.npmjs.org/"
   JL_PACKAGE: "@sap/joule-work-dev-cli-early-adopters@prerelease"
+  JL_INSTALL_DIR: "${{ github.workspace }}/.jl-cli"
 
 jobs:
   setup-cli:
@@ -20,15 +21,13 @@ jobs:
 
       - name: Install Joule Studio CLI
         run: |
-          npm install -g $JL_PACKAGE --registry $NPM_REGISTRY
-          jl version
+          npm install --prefix $JL_INSTALL_DIR $JL_PACKAGE --registry $NPM_REGISTRY
+          $JL_INSTALL_DIR/node_modules/.bin/jl version
 
       - name: Cache CLI
         uses: actions/cache/save@v4
         with:
-          path: |
-            /usr/local/lib/node_modules/
-            /usr/local/bin/jl
+          path: ${{ github.workspace }}/.jl-cli
           key: jl-cli-${{ github.run_id }}
 
   fetch-token:
@@ -58,13 +57,11 @@ jobs:
       - name: Restore CLI cache
         uses: actions/cache/restore@v4
         with:
-          path: |
-            /usr/local/lib/node_modules/
-            /usr/local/bin/jl
+          path: ${{ github.workspace }}/.jl-cli
           key: jl-cli-${{ github.run_id }}
 
       - name: Build solution
-        run: jl solution build
+        run: ${{ github.workspace }}/.jl-cli/node_modules/.bin/jl solution build
 
   deploy-solution:
     runs-on: ubuntu-latest
@@ -75,13 +72,12 @@ jobs:
       - name: Restore CLI cache
         uses: actions/cache/restore@v4
         with:
-          path: |
-            /usr/local/lib/node_modules/
-            /usr/local/bin/jl
+          path: ${{ github.workspace }}/.jl-cli
           key: jl-cli-${{ github.run_id }}
 
       - name: Deploy solution
         env:
           JL_URL: ${{ vars.JOULE_STUDIO_URL }}
           JOULE_STUDIO_TOKEN: ${{ needs.fetch-token.outputs.sciToken }}
-        run: jl solution deploy --force
+        run: ${{ github.workspace }}/.jl-cli/node_modules/.bin/jl solution deploy --force
+
