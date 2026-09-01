@@ -77,7 +77,7 @@ jobs:
 
       - name: Deploy solution
         env:
-          jouleStudioUrl: ${{ vars.JOULE_STUDIO_URL }}
+          JOULE_STUDIO_HOST: ${{ vars.JOULE_STUDIO_URL }}
           JOULE_STUDIO_TOKEN: ${{ needs.fetch-token.outputs.sciToken }}
         run: ${{ github.workspace }}/.jl-cli/node_modules/.bin/jl solution deploy --force
 
