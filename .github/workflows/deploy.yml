@@ -50,6 +50,7 @@ jobs:
         id: get-sci-token
         env:
           SCI_TENANT_URL: ${{ vars.SCI_TENANT_URL }}
+          SCI_CLIENT_ID: $SCI_CLIENT_ID
         run: |
          python .github/action/fetch-token/fetch.py
 
