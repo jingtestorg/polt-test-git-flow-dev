@@ -39,15 +39,18 @@ jobs:
     outputs:
       sciToken: ${{ steps.get-sci-token.outputs.sciToken }}
     steps:
+      - name: Mask sensitive variables
+        env:
+          SCI_CLIENT_ID: ${{ vars.SCI_CLIENT_ID }}
+        run: echo "::add-mask::$SCI_CLIENT_ID"
+      
       - uses: actions/checkout@v4
 
       - name: Get SCI Token
         id: get-sci-token
         env:
           SCI_TENANT_URL: ${{ vars.SCI_TENANT_URL }}
-          SCI_CLIENT_ID: ${{ vars.SCI_CLIENT_ID }}
         run: |
-         echo "::add-mask::$SCI_CLIENT_ID"
          python .github/action/fetch-token/fetch.py
 
   build-solution:
