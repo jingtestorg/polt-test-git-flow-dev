@@ -39,20 +39,14 @@ jobs:
     outputs:
       sciToken: ${{ steps.get-sci-token.outputs.sciToken }}
     steps:
-      - name: Mask sensitive variables
-        env:
-          SCI_CLIENT_ID: ${{ vars.SCI_CLIENT_ID }}
-        run: echo "::add-mask::$SCI_CLIENT_ID"
-      
       - uses: actions/checkout@v4
 
       - name: Get SCI Token
         id: get-sci-token
         env:
           SCI_TENANT_URL: ${{ vars.SCI_TENANT_URL }}
-          SCI_CLIENT_ID: $SCI_CLIENT_ID
-        run: |
-         python .github/action/fetch-token/fetch.py
+          SCI_CLIENT_ID: ${{ vars.SCI_CLIENT_ID }}
+        run: python .github/action/fetch-token/fetch.py
 
   build-solution:
     runs-on: ubuntu-latest
@@ -81,11 +75,10 @@ jobs:
           path: ${{ github.workspace }}/.jl-cli
           key: jl-cli-${{ github.run_id }}
 
-      - name: Deploy solution
-        env:
-          JOULE_STUDIO_HOST: ${{ vars.JOULE_STUDIO_URL }}
-          JOULE_STUDIO_TOKEN: ${{ needs.fetch-token.outputs.sciToken }}
+      - name: Set deploy environment
         run: |
-              echo "::add-mask::$JOULE_STUDIO_TOKEN"
-              ${{ github.workspace }}/.jl-cli/node_modules/.bin/jl solution deploy --force
+          echo "JOULE_STUDIO_HOST=${{ vars.JOULE_STUDIO_URL }}" >> $GITHUB_ENV
+          echo "JOULE_STUDIO_TOKEN=${{ needs.fetch-token.outputs.sciToken }}" >> $GITHUB_ENV
 
+      - name: Deploy solution
+        run: ${{ github.workspace }}/.jl-cli/node_modules/.bin/jl solution deploy --force
