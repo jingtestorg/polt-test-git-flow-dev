@@ -41,11 +41,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Mask sensitive variables
+        run: |
+          echo "::add-mask::${{ vars.SCI_CLIENT_ID }}"
+          echo "SCI_TENANT_URL=${{ vars.SCI_TENANT_URL }}" >> $GITHUB_ENV
+          echo "SCI_CLIENT_ID=${{ vars.SCI_CLIENT_ID }}" >> $GITHUB_ENV
+
       - name: Get SCI Token
         id: get-sci-token
-        env:
-          SCI_TENANT_URL: ${{ vars.SCI_TENANT_URL }}
-          SCI_CLIENT_ID: ${{ vars.SCI_CLIENT_ID }}
         run: python .github/action/fetch-token/fetch.py
 
   build-solution:
@@ -77,6 +80,7 @@ jobs:
 
       - name: Set deploy environment
         run: |
+          echo "::add-mask::${{ needs.fetch-token.outputs.sciToken }}"
           echo "JOULE_STUDIO_HOST=${{ vars.JOULE_STUDIO_URL }}" >> $GITHUB_ENV
           echo "JOULE_STUDIO_TOKEN=${{ needs.fetch-token.outputs.sciToken }}" >> $GITHUB_ENV
 
